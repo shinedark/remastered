@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Remastered",
+    "description": "Promo for album, look around and enjoy the music",
+    "slug": "shinedarkremastered",
+    "privacy": "public",
+    "sdkVersion": "25.0.0",
+    "platforms": ["ios"],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "packagerOpts": {
+          "assetExts": [
+            "dae",
+            "obj",
+            "mtl",
+            "amf",
+            "3mf",
+            "gif",
+            "jpg",
+            "assimp",
+            "fbx",
+            "pmd",
+            "vmd",
+            "ply",
+            "stl",
+            "vtk",
+            "vtp",
+            "mp4",
+            "drc",
+            "pcd",
+            "pack",
+            "bvh",
+            "x", 
+          ]
+        }
+  }
+}

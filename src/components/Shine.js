@@ -1,12 +1,24 @@
-import Expo, {Video, Audio, AppLoading, Asset} from 'expo';
+import Expo, { Audio, AppLoading, Asset} from 'expo';
 import React from 'react';
-import {View, Image, StyleSheet} from 'react-native';
+import {View, Image, StyleSheet, TouchableOpacity, Linking, Text} from 'react-native';
+
 
 import * as THREE from 'three'; // 0.87.1
 import ExpoTHREE from 'expo-three'; // 2.0.2
 
+function cacheImages(images) {
+  return images.map(image => {
+    if (typeof image === 'string') {
+      return Image.prefetch(image);
+    } else {
+      return Asset.fromModule(image).downloadAsync();
+    }
+  });
+}
+
 
 console.disableYellowBox = true;
+const url = "https://itunes.apple.com/us/artist/shine-dark/id993072837";
 
 class GifOverlay extends React.Component {
   state = {
@@ -16,21 +28,17 @@ class GifOverlay extends React.Component {
 
   render() {
     return this.state.visible ? (
-      <Video
-        source={{ uri: 'https://media.giphy.com/media/3ohhwEZqxzKbNUHzji/giphy.mp4' }}
-        rate={1.0}
-        volume={1.0}
-        isMuted={false}
-        resizeMode="cover"
-        shouldPlay
-        isLooping
-        style={{
-          position: 'absolute',
-          left: 0, top: 0, bottom: 0, right: 0,
-          // backgroundColor: '#f1e8e4',
-          opacity: 0.3,
-        }}
-      />
+      <TouchableOpacity style={styles.touchable} onPress={() => Linking.canOpenURL(url).then(supported => {
+        if (!supported) {
+          console.log('Can\'t handle url: ' + url);
+        } else {
+          return Linking.openURL(url);
+        }
+      }).catch(err => console.error('An error occurred', err))}>
+      <View style={styles.container}>
+        <Text style={styles.paragraph}>Get Album</Text>
+        </View>
+      </TouchableOpacity>
     ) : null;
   }
 
@@ -39,10 +47,33 @@ class GifOverlay extends React.Component {
   }
 }
 
+const styles = StyleSheet.create({
+    touchable: {
+        position: 'absolute',
+        bottom: 18,
+        right: 18,
+    },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: 'white',
+    opacity: 0.9,
+    borderRadius: 4    
+  },
+  paragraph: {
+    fontSize: 23,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#34495e',
+  },
+});
+
 export default class Shine extends React.Component {
 
   state = {
-        isReady: false
+        isReady: false,
       }
 
   async componentDidMount() {
@@ -53,14 +84,13 @@ export default class Shine extends React.Component {
       shouldDuckAndroid: true,
       interruptionModeAndroid: Expo.Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
     });
-
     await this.playBackgroundMusicAsync();
   }
   
   playBackgroundMusicAsync = async () => {
     const soundObject = new Expo.Audio.Sound();
     try {
-      await soundObject.loadAsync(require('../../assets/talo.m4a'));
+      await soundObject.loadAsync(require('../../assets/rell.m4a'));
       await soundObject.playAsync();
       await soundObject.setStatusAsync({
         shouldPlay: true,
@@ -74,8 +104,30 @@ export default class Shine extends React.Component {
   }
 
 
+
   
   render() {
+        if (!this.state.isReady) {
+              return (
+                <View style={{flex: 1}}>
+                  <Image  
+                      source={require('../../assets/shine.gif')}
+                      resizeMode="cover"
+                      style={{
+                        position: 'absolute',
+                        left: 0, top: 0, bottom: 0, right: 0,
+                      }}
+                      
+                    />
+                    <AppLoading
+                      startAsync={this._loadAssetsAsync}
+                      onFinish={() => this.setState({ isReady: true })}
+                      onError={console.warn}
+                    />
+                </View>
+              );
+            }
+
       return (
         <View style={{ flex: 1 }}>
           <Expo.GLView
@@ -87,7 +139,18 @@ export default class Shine extends React.Component {
         </View>
       );
     }
-  
+    
+      async _loadAssetsAsync() {
+          const imageAssets = cacheImages([
+              
+              require('../../assets/rell.m4a'),
+              require('../../assets/shine.gif'),
+              require('../../assets/remastered.png'),
+          ]);
+
+          await Promise.all([... imageAssets]);
+        }
+
 
   _onGLContextCreate = async (gl) => {
     const width = gl.drawingBufferWidth;
@@ -101,20 +164,20 @@ export default class Shine extends React.Component {
     const renderer = ExpoTHREE.createRenderer({ gl });
     renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
+
     scene.background = ExpoTHREE.createARBackgroundTexture(arSession, renderer);
-
-
-    // const material2 = new THREE.MeshBasicMaterial({ color: '#fdfe02' });
-    // const geometry = new THREE.BoxGeometry(1, 1, 1);
 
         const material = new THREE.MeshBasicMaterial({
               
               // NOTE: How to create an Expo-compatible THREE texture
-              map: await ExpoTHREE.createTextureAsync({
+              map:  await ExpoTHREE.createTextureAsync({
                 asset: Expo.Asset.fromModule(require('../../assets/shine.gif')),
               }),
             });
-
+            material.transparent = false;
+            material.side = THREE.DoubleSide;
+            material.depthWrite = true;
+            // material.map.needsUpdate = true;
         
 
         const material2 = new THREE.MeshBasicMaterial({
@@ -123,16 +186,56 @@ export default class Shine extends React.Component {
                 asset: Expo.Asset.fromModule(require('../../assets/remastered.png')),
               }),
             });
+          material2.transparent = false;
+          material2.side = THREE.DoubleSide;
+          material2.depthWrite = true;
 
+          var mergedGeometry = new THREE.Geometry();
+          
+          var boxGeometry = new THREE.BoxGeometry(6, 6, 6);
+          var material3 = new THREE.MeshBasicMaterial( { color: 0xffffff }  );
+              material3.transparent = false;
+              material3.side = THREE.DoubleSide;
+              material3.depthWrite = true;
+
+          for (var i = 0; i < 5000; i++) {
+
+              var x = Math.random() * 500 - 250;
+              var y = Math.random() * 500 - 250;
+              var z = Math.random() * 500 - 250;
+
+              boxGeometry.translate(x, y, z);
+
+              mergedGeometry.merge(boxGeometry);
+
+              boxGeometry.translate(-x, -y, -z);
+          }
+
+          var cubes = new THREE.Mesh(mergedGeometry, material3);
+          scene.add(cubes);
+
+                      
     // Edit the box dimensions here and see changes immediately!
     const geometry = new THREE.BoxGeometry(0.16, 0.16, 0.16);
     const geometry2 = new THREE.BoxGeometry(0.30, 0.7, 0.7);
-    // const video = Expo.Asset.fromModule(require('./assets/car.mp4'));
+    
+    const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 32, 6, 6.3);
 
     
+    const mat = new THREE.MeshBasicMaterial({ color: '#586c6d' });
+    mat.transparent = true;
+    mat.side = THREE.DoubleSide;
+    mat.depthWrite = true;
+    
+    
+
+    const sphere = new THREE.Mesh(sphereGeometry, mat);
+    sphere.position.z = 0.30;
+    scene.add(sphere);
 
     const cube = new THREE.Mesh( geometry , material);
     cube.position.z = -0.3;
+
     scene.add(cube);
 
 
@@ -148,24 +251,26 @@ export default class Shine extends React.Component {
     rectangle.position.y = -0.63;
     scene.add(rectangle);
 
+    
     const animate = () => {
       requestAnimationFrame(animate);
-
       
+     
+      sphere.rotation.y += 0.01;
       rectangle.rotation.y += 0.01;
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;
-      cube2.rotation.x += 0.02;
-      cube2.rotation.y += 0.02;
-      cube3.rotation.x += 0.03;
-      cube3.rotation.y += 0.03;
+      cube2.rotation.x += 0.01;
+      cube2.rotation.y += 0.01;
+      cube3.rotation.x += 0.01;
+      cube3.rotation.y += 0.01;
       
       renderer.render(scene, camera);
       gl.endFrameEXP();
     }
     animate();
+
   }
 }
-
 
 

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text ,Image} from 'react-native';
+import { View, Text ,Image, Animated, Easing} from 'react-native';
 import { Button } from 'native-base';
+import { Asset} from 'expo';
 
 
 
@@ -9,26 +10,68 @@ class TextOverlay extends React.Component {
     visible: true,
   }
 
+  constructor () {
+    super()
+    this.animatedValue = new Animated.Value(0)
+  }
+
+  async componentDidMount() {
+    this._cacheResourcesAsync();
+    this.animate();
+  }
+
+  
+  animate () {
+    this.animatedValue.setValue(0)
+    Animated.timing(
+      this.animatedValue,
+      {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.cubic
+      }
+    ).start(() => this.animate())
+  }
 
   render() {
+    const marginTop = this.animatedValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 130]
+      })
     return this.state.visible ? (
         <View style={styles.viewStyles}>
-  		    <Button
-  		      rounded 
-            transparent
-            
-  		      style={styles.buttonStyles}
-  		      onPress={() => this.props.switchScreen("search")}
+          <Animated.View style={{marginTop}}>
+    		    <Button
+    		      rounded 
+              transparent
+              
+    		      style={styles.buttonStyles}
+    		      onPress={() => this.props.switchScreen("search")}
 
-  		    >
-  		      <Image 
-              style={styles.ball}
-              source={{uri: 'https://media.giphy.com/media/5ciuhhe0rQva8/giphy-downsized.gif'}}
-            />
-  		    </Button>
+    		    >
+    		      <Image 
+                style={styles.ball}
+                source={require('../../assets/mdrop.gif')}
+              />
+    		    </Button>
+          </Animated.View>
       	</View>
     ) : null;
   }
+
+  async _cacheResourcesAsync() {
+      const images = [
+      
+        require('../../assets/mdrop.gif'),
+        
+      ];
+
+      const cacheImages = images.map((image) => {
+        return Asset.fromModule(image).downloadAsync();
+      });
+      return Promise.all(cacheImages)
+  }
+
 
   setVisible(visible) {
     this.setState({ visible });

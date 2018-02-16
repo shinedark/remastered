@@ -1,19 +1,30 @@
 import React from 'react';
 import {  View, Text, Image} from 'react-native';
 import { Button } from 'native-base';
-import Expo, {Video, Audio, Asset} from 'expo';
+import Expo, { Audio, Asset, AppLoading} from 'expo';
 import Shine from './Shine';
 import TextOverlay from './TextOverlay';
 
 const styles = {
   container:{
-    flex: 1,
+    flex: 1
   }
+}
+
+function cacheImages(images) {
+  return images.map(image => {
+    if (typeof image === 'string') {
+      return Image.prefetch(image);
+    } else {
+      return Asset.fromModule(image).downloadAsync();
+    }
+  });
 }
 
 export default class Dark extends React.Component{
 	state={
-	  currentScreen: "landing"
+	  currentScreen: "landing",
+	  isReady: false,
 	}
 
 
@@ -26,7 +37,7 @@ export default class Dark extends React.Component{
 	    shouldDuckAndroid: true,
 	    interruptionModeAndroid: Expo.Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
 	  });
-
+	  
 	  await this.playBackgroundMusicAsync();
 	}
 	
@@ -52,26 +63,51 @@ export default class Dark extends React.Component{
 	}
 
 	
+	async _loadAssetsAsync() {
+	    const imageAssets = cacheImages([
+	      	'https://media.giphy.com/media/3osBLlsqoiD8tZytJ6/giphy.gif',
+        	require('../../assets/water2.m4a'),
+        	require('../../assets/shine.gif'),
+	    ]);
+
+	    await Promise.all([... imageAssets]);
+	  }
 
 	renderScreen = () => {
-	  if(this.state.currentScreen === "landing"){
+	  if (!this.state.isReady) {
+	        return (
+	        	<View style={{flex:1}}>
+		          <Image  
+		              source={require('../../assets/shine.gif')}
+		              resizeMode="cover"
+		              style={{
+		                position: 'absolute',
+		                left: 0, top: 0, bottom: 0, right: 0,
+		                flex:1,
+		              }}
+		              
+		            />
+		            <AppLoading
+		              startAsync={this._loadAssetsAsync}
+		              onFinish={() => this.setState({ isReady: true })}
+		              onError={console.warn}
+		            />
+		        </View>
+	        );
+	      }
+	  else if(this.state.currentScreen === "landing"){
 	    return(
 	    	<View style={{flex: 1}}>
-	    		<Video
-	    		  source={{ uri: 'https://media.giphy.com/media/3osBLlsqoiD8tZytJ6/giphy.mp4' }}
-	    		  rate={1.0}
-	    		  volume={1.0}
-	    		  isMuted={false}
-	    		  resizeMode="cover"
-	    		  shouldPlay
-	    		  isLooping
+	    		<Image
+	    		  source={{uri: 'https://media.giphy.com/media/3osBLlsqoiD8tZytJ6/giphy.gif'}}
+	    		  resizeMode= "cover"
 	    		  style={{
 	    		    position: 'absolute',
 	    		    left: 0, top: 0, bottom: 0, right: 0,
-	    		    
+	    		    // flex: 1,
 	    		  }}
 	    		/>
-	    	<TextOverlay stopMusic={this.stopMusic} switchScreen={this.switchScreen}/>
+	    		<TextOverlay switchScreen={this.switchScreen}/>
 	    	</View>
 	      
 	    )
@@ -89,6 +125,8 @@ export default class Dark extends React.Component{
 		  </View>
 		);
 	}
+
+
 }
 
 

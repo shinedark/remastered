@@ -1,4 +1,4 @@
-import Expo, { Audio, AppLoading, Asset} from 'expo';
+import Expo, { Audio, Asset} from 'expo';
 import React from 'react';
 import {View, Image, StyleSheet, TouchableOpacity, Linking, Text} from 'react-native';
 
@@ -24,7 +24,6 @@ class GifOverlay extends React.Component {
   state = {
     visible: true,
   }
-
 
   render() {
     return this.state.visible ? (
@@ -72,9 +71,9 @@ const styles = StyleSheet.create({
 
 export default class Shine extends React.Component {
 
-  state = {
-        isReady: false,
-      }
+  state={
+    currentScreen: "search"
+  }
 
   async componentDidMount() {
     Expo.Audio.setAudioModeAsync({
@@ -85,6 +84,7 @@ export default class Shine extends React.Component {
       interruptionModeAndroid: Expo.Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
     });
     await this.playBackgroundMusicAsync();
+    await this._loadAssetsAsync();
   }
   
   playBackgroundMusicAsync = async () => {
@@ -107,29 +107,8 @@ export default class Shine extends React.Component {
 
   
   render() {
-        if (!this.state.isReady) {
-              return (
-                <View style={{flex: 1}}>
-                  <Image  
-                      source={require('../../assets/shine.gif')}
-                      resizeMode="cover"
-                      style={{
-                        position: 'absolute',
-                        left: 0, top: 0, bottom: 0, right: 0,
-                      }}
-                      
-                    />
-                    <AppLoading
-                      startAsync={this._loadAssetsAsync}
-                      onFinish={() => this.setState({ isReady: true })}
-                      onError={console.warn}
-                    />
-                </View>
-              );
-            }
-
       return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 2 }}>
           <Expo.GLView
             ref={(ref) => this._glView = ref}
             style={{ flex: 1 }}
@@ -146,6 +125,7 @@ export default class Shine extends React.Component {
               require('../../assets/rell.m4a'),
               require('../../assets/shine.gif'),
               require('../../assets/remastered.png'),
+              require('../../assets/icon.png'),
           ]);
 
           await Promise.all([... imageAssets]);
@@ -177,13 +157,23 @@ export default class Shine extends React.Component {
             material.transparent = false;
             material.side = THREE.DoubleSide;
             material.depthWrite = true;
-            // material.map.needsUpdate = true;
+        
+        const material4 = new THREE.MeshBasicMaterial({
+              
+              // NOTE: How to create an Expo-compatible THREE texture
+              map:  await ExpoTHREE.createTextureAsync({
+                asset: Expo.Asset.fromModule(require('../../assets/shine.gif')),
+              }),
+            });
+            material.transparent = false;
+            material.side = THREE.DoubleSide;
+            material.depthWrite = true;    
         
 
         const material2 = new THREE.MeshBasicMaterial({
               // NOTE: How to create an Expo-compatible THREE texture
               map: await ExpoTHREE.createTextureAsync({
-                asset: Expo.Asset.fromModule(require('../../assets/remastered.png')),
+                asset: Expo.Asset.fromModule(require('../../assets/icon.png')),
               }),
             });
           material2.transparent = false;
@@ -222,10 +212,12 @@ export default class Shine extends React.Component {
     const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 32, 6, 6.3);
 
     
-    const mat = new THREE.MeshBasicMaterial({ color: '#586c6d' });
+    const mat = new THREE.MeshNormalMaterial({  color: 0x55add2});
     mat.transparent = true;
     mat.side = THREE.DoubleSide;
     mat.depthWrite = true;
+
+
     
     
 
@@ -239,7 +231,7 @@ export default class Shine extends React.Component {
     scene.add(cube);
 
 
-    const cube2 = new THREE.Mesh( geometry , material);
+    const cube2 = new THREE.Mesh( geometry , material4);
     cube2.position.z = -0.6;
     scene.add(cube2);
 
@@ -255,8 +247,8 @@ export default class Shine extends React.Component {
     const animate = () => {
       requestAnimationFrame(animate);
       
-     
       sphere.rotation.y += 0.01;
+      sphere.rotation.x += 0.01;
       rectangle.rotation.y += 0.01;
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;

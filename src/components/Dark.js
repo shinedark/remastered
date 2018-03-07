@@ -1,7 +1,7 @@
 import React from 'react';
 import {  View, Text, Image} from 'react-native';
 import { Button } from 'native-base';
-import Expo, { Audio, Asset, AppLoading} from 'expo';
+import Expo, { Audio, Asset, AppLoading, Video} from 'expo';
 import Shine from './Shine';
 import TextOverlay from './TextOverlay';
 
@@ -65,9 +65,10 @@ export default class Dark extends React.Component{
 	
 	async _loadAssetsAsync() {
 	    const imageAssets = cacheImages([
-	      	'https://media.giphy.com/media/3osBLlsqoiD8tZytJ6/giphy.gif',
+	      	// 'https://media.giphy.com/media/3osBLlsqoiD8tZytJ6/giphy.gif',
         	require('../../assets/water2.m4a'),
         	require('../../assets/shine.gif'),
+        	require('../../assets/drop.mp4'),
 	    ]);
 
 	    await Promise.all([... imageAssets]);
@@ -98,9 +99,13 @@ export default class Dark extends React.Component{
 	  else if(this.state.currentScreen === "landing"){
 	    return(
 	    	<View style={{flex: 1}}>
-	    		<Image
-	    		  source={{uri: 'https://media.giphy.com/media/3osBLlsqoiD8tZytJ6/giphy.gif'}}
+	    		<Video
+	    		  source={require('../../assets/drop.mp4')}
 	    		  resizeMode= "cover"
+	    		  shouldPlay
+	    		  isLooping
+	    		  isMuted={true}
+	    		  rate={1.0}
 	    		  style={{
 	    		    position: 'absolute',
 	    		    left: 0, top: 0, bottom: 0, right: 0,

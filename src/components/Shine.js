@@ -1,10 +1,9 @@
-import Expo, { Audio, Asset} from 'expo';
+import Expo, { GLView, Audio, Asset} from 'expo';
 import React from 'react';
-import {View, Image, StyleSheet, TouchableOpacity, Linking, Text} from 'react-native';
+import {View, Image, TouchableOpacity, Linking, Text} from 'react-native';
 
-
-import * as THREE from 'three'; // 0.87.1
-import ExpoTHREE from 'expo-three'; // 2.0.2
+import * as THREE from 'three'; 
+import ExpoTHREE from 'expo-three'; 
 
 function cacheImages(images) {
   return images.map(image => {
@@ -36,7 +35,7 @@ class GifOverlay extends React.Component {
       }).catch(err => console.error('An error occurred', err))}>
       <View style={styles.container}>
         <Text style={styles.paragraph}>Get Album</Text>
-        </View>
+      </View>
       </TouchableOpacity>
     ) : null;
   }
@@ -46,7 +45,7 @@ class GifOverlay extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = {
     touchable: {
         position: 'absolute',
         bottom: 18,
@@ -67,7 +66,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#34495e',
   },
-});
+};
 
 export default class Shine extends React.Component {
 
@@ -108,8 +107,8 @@ export default class Shine extends React.Component {
   
   render() {
       return (
-        <View style={{ flex: 2 }}>
-          <Expo.GLView
+        <View style={{ flex: 1 }}>
+          <GLView
             ref={(ref) => this._glView = ref}
             style={{ flex: 1 }}
             onContextCreate={this._onGLContextCreate}

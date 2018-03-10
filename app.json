@@ -5,43 +5,38 @@
     "slug": "shinedarkremastered",
     "privacy": "public",
     "sdkVersion": "25.0.0",
-    "platforms": ["ios"],
-    "version": "1.0.0",
+    "platforms": [
+      "ios"
+    ],
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "contain"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.pinedacamilo.remastered"
+      "bundleIdentifier": "com.pinedacamilo.remastered",
+      "publishBundlePath": "ios/remastered/Supporting/shell-app.bundle",
+      "publishManifestPath": "ios/remastered/Supporting/shell-app-manifest.json",
+      "loadJSInBackgroundExperimental": true
+    },
+    "android": {
+      "package": "com.pinedacamilo.remastered"
     },
     "packagerOpts": {
-          "assetExts": [
-            "dae",
-            "obj",
-            "mtl",
-            "amf",
-            "3mf",
-            "gif",
-            "jpg",
-            "assimp",
-            "fbx",
-            "pmd",
-            "vmd",
-            "ply",
-            "stl",
-            "vtk",
-            "vtp",
-            "mp4",
-            "drc",
-            "pcd",
-            "pack",
-            "bvh",
-            "x",
-          ]
-        }
+      "assetExts": [
+        "gif",
+        "jpg",
+        "mp4"
+      ]
+    },
+    "isDetached": true,
+    "detach": {
+      "scheme": "exp3ce64c1b2bc54c7088192bd1b49bba2a",
+      "iosExpoViewUrl": "https://s3.amazonaws.com/exp-exponent-view-code/ios-v2.3.3-sdk25.0.0-e7a4361a-631d-4caf-9692-1880d71c394a.tar.gz",
+      "androidExpoViewUrl": "https://s3.amazonaws.com/exp-exponent-view-code/android-v2.3.0-sdk25.0.0-0c32461b-a7c6-4ddc-b85b-32a80c4f18d9.tar.gz"
+    }
   }
 }
